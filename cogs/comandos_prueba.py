@@ -132,19 +132,6 @@ class Comandos_Prueba(Cog):
         palabras = ["Ya", "Ok", "Aea"]
         await ctx.send(f"{member.mention} {random.choice(palabras)}")
 
-    @command()
-    async def yt(self, ctx, *, video):
-
-        if len(video) == 0:
-            await ctx.send("Indique que desea buscar")
-        else:
-
-            search_keyword = video.replace(" ", "+")
-            html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
-            video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
-            print("https://www.youtube.com/watch?v=" + video_ids[0])
-            await ctx.send("https://www.youtube.com/watch?v=" + video_ids[0])
-    
     #@command(name = "gif", pass_context = True)
     #async def giphy(self, ctx, *, search):
       #  embed = discord.Embed(title = "Gif!", description = f"Resultado para: {search}", colour = ctx.author.colour, timestamp = datetime.utcnow())
