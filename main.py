@@ -111,7 +111,7 @@ class Bot(CBot):
             self.scheduler.start()
             print("Bot listo")
             
-            await self.stdout.send("❤️")
+            #await self.stdout.send("❤️")
 
             while not self.cogs_ready.all_ready():
                 await sleep(0.5)
