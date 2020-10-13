@@ -86,7 +86,7 @@ class Bot(CBot):
         print("Bot desconectado")
 
     async def rules_reminder(self):
-        await self.stdout.send("Recuerden mantener activo el server ❤️😓")
+        await self.stdout.send("Recuerden mantener activo el server ❤️😓.")
 
     async def on_error(self, error, *args, **kwargs):
         if error == "on_command_error":
