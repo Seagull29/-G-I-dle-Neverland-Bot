@@ -90,7 +90,8 @@ class Bot(CBot):
 
     async def on_error(self, error, *args, **kwargs):
         if error == "on_command_error":
-            await args[0].send("Algo ocurrio mal")
+            print (args[0].send("Algo ocurrio mal"))
+            pass
         else:
             print ("Ocurrio un error")
 

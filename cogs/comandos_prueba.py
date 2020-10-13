@@ -33,7 +33,7 @@ class Comandos_Prueba(Cog):
     async def on_command_error(self, ctx, error):
         if isinstance(error, CommandNotFound):
             comando = (str(error)).split()
-            await ctx.send(f"No conozco el comando {comando[1]}")
+            print (ctx.send(f"No conozco el comando {comando[1]}"))
 
     @command()
     async def status(self, ctx, *, actividad):
