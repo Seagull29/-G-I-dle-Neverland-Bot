@@ -11,6 +11,7 @@ from discord.ext.commands import command
 import db
 import os
 from discord.ext.commands import when_mentioned_or
+from discord import Intents
 #PREFIX = "!"
 CREADOR = [418960285500440576]
 VERSION = "0.1"
@@ -26,6 +27,8 @@ def get_prefix(bot, mensaje):
     prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", mensaje.guild.id)
     return when_mentioned_or(prefix)(bot, mensaje) 
 
+intents = Intents.default()
+intents.members = True
 
 class Ready(object):
     def __init__(self):
@@ -49,7 +52,7 @@ class Bot(CBot):
 
         db.autosave(self.scheduler)
 
-        super().__init__(command_prefix = get_prefix, owner_ids = CREADOR)
+        super().__init__(command_prefix = get_prefix, owner_ids = CREADOR, intents = intents)
     
     def setup(self):
         for cog in COGS:
