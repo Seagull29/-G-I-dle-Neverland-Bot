@@ -27,10 +27,11 @@ def get_prefix(bot, mensaje):
     prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", mensaje.guild.id)
     return when_mentioned_or(prefix)(bot, mensaje) 
 
-#intents = Intents.default()
-#intents.members = True
+intents = Intents.default()
+intents.members = True
+intents.presences = True
 
-INTENTS = Intents.all()
+
 
 class Ready(object):
     def __init__(self):
@@ -54,7 +55,7 @@ class Bot(CBot):
 
         db.autosave(self.scheduler)
 
-        super().__init__(command_prefix = get_prefix, owner_ids = CREADOR, intents = INTENTS)
+        super().__init__(command_prefix = get_prefix, owner_ids = CREADOR, intents = intents)
     
     def setup(self):
         for cog in COGS:
