@@ -9,6 +9,12 @@ import json, aiohttp
 from random import randint, sample
 from datetime import datetime
 import urllib, re
+
+
+GIPHY = "giphy"
+TENOR = "tenor"
+TRENDING_LABEL = "***Trendings***"
+
 class Fun(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -37,8 +43,8 @@ class Fun(Cog):
         embed = Embed(title = "Giphy!", description = f"**Busqueda aleatoria:**", colour = ctx.author.colour, timestamp = datetime.utcnow())
         embed.set_author(name = data['data']['user']['display_name'] if 'user' in data['data'] else 'Autor desconocido', icon_url = data['data']['user']['avatar_url'] if 'user' in data['data'] else '')
         embed.set_thumbnail(url = "https://giphy.com/static/img/giphy_logo_square_social.png")
-        embed.add_field(name = "Titulo", value = title if not title == '' and not title == ' ' else 'N/A', inline = True)
-        embed.add_field(name = "Enlace", value = f"https://giphy.com/{'gifs' if not 'stickers' in search_type else 'stickers'}/{url[31 : longitud_codigo]}", inline = True)
+        embed.add_field(name = "Titulo", value = f'*{title}*' if not title == '' and not title == ' ' else 'N/A', inline = True)
+        embed.add_field(name = "Enlace", value = f"*https://giphy.com/{'gifs' if not 'stickers' in search_type else 'stickers'}/{url[31 : longitud_codigo]}*", inline = True)
         embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
         embed.set_image(url= str(url))
         mensaje = await ctx.send(embed = embed)
@@ -58,7 +64,7 @@ class Fun(Cog):
             #await ctx.send("https://www.youtube.com/watch?v=" + video_ids[0])
 
    
-    @command(name = "giphy", pass_context = True)
+    @command(name = "giphy", aliases = ["gy"], pass_context = True)
     async def giphy_command(self, ctx, search_type : str, *, search = None):
         session = aiohttp.ClientSession()
 
@@ -68,7 +74,7 @@ class Fun(Cog):
                 response = await session.get('https://api.giphy.com/v1/stickers/trending?api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG&limit=30')
                 data = json.loads(await response.text())
                 direcciones = [[gif_object] for gif_object in data['data']]
-                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), "***Trendings***"), delete_message_after = False)
+                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), TRENDING_LABEL, GIPHY), delete_message_after = False)
                 await menu.start(ctx)
             
             elif search in ["r", "random"]:
@@ -85,7 +91,7 @@ class Fun(Cog):
                 #for url in data['data']:
                 #    direcciones.append([url['images']['original']['url']]) # Filtra del archivo json todas las urls de la busqueda
                 
-                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search), delete_message_after = False)
+                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search, GIPHY), delete_message_after = False)
                 await menu.start(ctx)  
 
         elif search_type in ["g", "gif"]:
@@ -94,7 +100,7 @@ class Fun(Cog):
                 response = await session.get('https://api.giphy.com/v1/gifs/trending?api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG&limit=30')
                 data = json.loads(await response.text())
                 direcciones = [[gif_object] for gif_object in data['data']]
-                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), "***Trendings***"), delete_message_after = False)
+                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), TRENDING_LABEL, GIPHY), delete_message_after = False)
                 await menu.start(ctx)
             
             elif search in ["r", "random"]:
@@ -111,50 +117,76 @@ class Fun(Cog):
                 #for url in data['data']:
                 #    direcciones.append([url['images']['original']['url']]) # Filtra del archivo json todas las urls de la busqueda
                 
-                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search), delete_message_after = False)
+                menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search, GIPHY), delete_message_after = False)
                 await menu.start(ctx)  
         await session.close()
 
     @command(name = "tenor", pass_context = True)
-    async def tenor_command(self, ctx):
-        pass
+    async def tenor_command(self, ctx, *, search = None):
+        session = aiohttp.ClientSession()
+        if search is None:
+            response = await session.get('https://api.tenor.com/v1/trending?key=87NYM0CK0LBX&limit=30')
+            data = json.loads(await response.text())
+            direcciones = [[gif_object] for gif_object in data['results']]
+            menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), TRENDING_LABEL, TENOR), delete_message_after = False)
+            await menu.start(ctx)
+        await session.close()
 
 
 class Paginas(ListPageSource):
-    def __init__(self, ctx, data, busqueda):
+    def __init__(self, ctx, data, busqueda, source):
         self.ctx = ctx
         self.busqueda = busqueda
         self.urls = data # Recibe la lista de las urls 
+        self.source = source
         super().__init__(data, per_page = 1)
 
     async def format_page(self, menu, entries):
         offset = (menu.current_page * self.per_page) + 1
         len_data = len(self.entries)
+
+        if self.source == GIPHY:
+            url = self.urls[menu.current_page][0]['images']['original']['url']
+            title  = self.urls[menu.current_page][0]['title'] 
+            search_type = self.urls[menu.current_page][0]['url']
+            id = self.urls[menu.current_page][0]['id']
+            content_source = self.urls[menu.current_page][0]['source']
+
+            #longitud_codigo = 31 + url[31:].find("/")
+            print ("Flag " + url)
+            embed = Embed(title = "Giphy!", 
+                        description = f"**Resultados para:** *{self.busqueda}*", 
+                        colour = self.ctx.author.colour, timestamp = datetime.utcnow())
+
+            embed.set_author(name = self.urls[menu.current_page][0]['user']['display_name'] if 'user' in self.urls[menu.current_page][0] else 'Autor desconocido', 
+                            icon_url = self.urls[menu.current_page][0]['user']['avatar_url'] if 'user' in self.urls[menu.current_page][0] else '')
+
+            embed.set_thumbnail(url = "https://giphy.com/static/img/giphy_logo_square_social.png")
+
+            fields = [("Titulo", f'*{title}*' if not title == '' and not title == ' ' else '*N/A*', True), ("ID", id, True), 
+                      ("Enlace", f"https://giphy.com/{'gifs' if not 'stickers' in search_type else 'stickers'}/{id}", False),
+                      ("Fuente", f'*{content_source}*' if not content_source == '' and not content_source == ' ' else '*Fuente desconocida*', False)]
+            for name, value, inline in fields:
+                embed.add_field(name = name, value = value, inline = inline)
     
-        url = self.urls[menu.current_page][0]['images']['original']['url']
-        title  = self.urls[menu.current_page][0]['title'] 
-        search_type = self.urls[menu.current_page][0]['url']
+            embed.set_footer(text = f"Solicitado por {self.ctx.author.display_name}" + "\n" + f"{offset:,} de {len_data:,} gifs.", icon_url = self.ctx.author.avatar_url)
+            embed.set_image(url= str(url))
+            return embed
 
-        longitud_codigo = 31 + url[31:].find("/")
-        print ("Flag " + url)
-        embed = Embed(title = "Giphy!", 
-                      description = f"**Resultados para:** *{self.busqueda}*", 
-                      colour = self.ctx.author.colour, timestamp = datetime.utcnow())
-
-        embed.set_author(name = self.urls[menu.current_page][0]['user']['display_name'] if 'user' in self.urls[menu.current_page][0] else 'Autor desconocido', 
-                         icon_url = self.urls[menu.current_page][0]['user']['avatar_url'] if 'user' in self.urls[menu.current_page][0] else '')
-
-        embed.set_thumbnail(url = "https://giphy.com/static/img/giphy_logo_square_social.png")
-
-        fields = [("Titulo", title if not title == '' and not title == ' ' else 'N/A', True),
-                  ("Enlace", f"https://giphy.com/{'gifs' if not 'stickers' in search_type else 'stickers'}/{url[31 : longitud_codigo]}", True)]
-
-        for name, value, inline in fields:
-            embed.add_field(name = name, value = value, inline = inline)
-        embed.set_footer(text = f"Solicitado por {self.ctx.author.display_name}" + "\n" + f"{offset:,} de {len_data:,} gifs.", icon_url = self.ctx.author.avatar_url)
-        
-        embed.set_image(url= str(url))
-        return embed
+        elif self.source == TENOR:
+            url = self.urls[menu.current_page][0]['media'][0]['gif']['url']
+            title = self.urls[menu.current_page][0]['title'] 
+            id = self.urls[menu.current_page][0]['id']
+            print ("URL " + url)
+            embed = Embed(title = "Tenor!", description = f"**Resultados para:** *{self.busqueda}*",
+                          colour = self.ctx.author.colour, timestamp = datetime.utcnow())
+            embed.set_thumbnail(url = "https://www.brandchannel.com/wp-content/uploads/2017/04/tenor-logo.jpg")
+            embed.add_field(name = "Titulo", value = f'*{title}*' if not title == '' and not title == ' ' else '*N/A*', inline = True)
+            embed.add_field(name = "ID", value = f'*{id}*', inline = True)
+            embed.add_field(name = "Enlace", value = f"*https://tenor.com/view/{id}*", inline = False)
+            embed.set_footer(text = f"Solicitado por {self.ctx.author.display_name}" + "\n" + f"{offset:,} de {len_data:,} gifs.", icon_url = self.ctx.author.avatar_url) 
+            embed.set_image(url = url)
+            return embed
 
 class BusquedaYoutube(ListPageSource):
     def __init__(self, ctx, data):
