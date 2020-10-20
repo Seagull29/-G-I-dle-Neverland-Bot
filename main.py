@@ -12,11 +12,14 @@ import db
 import os
 from discord.ext.commands import when_mentioned_or
 from discord import Intents
+from itertools import cycle
+import discord
 #PREFIX = "!"
 CREADOR = [418960285500440576]
 VERSION = "0.1"
 TOKEN = "NzY1MzU5MTEwOTAzMzAwMDk3.X4TqNw.DLwW0GmiF_1Bp3aP6IWA4QGegsU"
 #COGS = [path.split("\\")[-1][:-3] for path in glob("../lib/cogs/*.py")]
+ESTADOS = cycle(["(G)I-dle", "T-ara", "Dreamcatcher", "LATATA", "Maze", "HANN", "Senorita", "Uh-Oh", "LION", "Oh my god", "i'm THE TREND", "DUMDi DUMDi"])
 COGS = []
 for filename in os.listdir("./cogs"):
     if (filename.endswith(".py")):
@@ -92,7 +95,12 @@ class Bot(CBot):
         print("Bot desconectado")
 
     async def rules_reminder(self):
-        await self.stdout.send("Recuerden mantener activo el server ❤️😓.")
+        recordatorio = await self.stdout.send(f">>> Recuerden mantener activo el server ❤️😓." + "\n" + f"Pasen por {self.get_channel(764918831516090368).mention} para obtener el rol de sus bias.")
+        await recordatorio.add_reaction("🎼")
+
+
+    async def cambiar_estado(self):
+        await self.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = next(ESTADOS)))
 
     async def on_error(self, error, *args, **kwargs):
         if error == "on_command_error":
@@ -113,7 +121,8 @@ class Bot(CBot):
         if not self.ready:
             self.guild = self.get_guild(764606089068281856)
             self.stdout = self.get_channel(764606089509208114)
-            self.scheduler.add_job(self.rules_reminder, CronTrigger(day_of_week = 0, hour = 8, minute = 0, second = 0))
+            self.scheduler.add_job(self.rules_reminder, CronTrigger(hour = '1, 17', minute = 0, second = 0))
+            self.scheduler.add_job(self.cambiar_estado, CronTrigger(minute = '0, 15, 30, 45', second = 0))
             self.scheduler.start()
             print("Bot listo")
             
