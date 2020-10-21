@@ -114,7 +114,7 @@ class Info(Cog):
                 if isinstance(actividad, Spotify):
                     tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
                     tracks.append(("Cancion", f"*{actividad.title}*", True))
-                    tracks.append(("Album", f"*{actividad.album}*", False))
+                    tracks.append(("Album", f"*{actividad.album}*", True))
                     logo = actividad.album_cover_url
                 embed = Embed(title = f"Actividad en Spotify de {member.display_name}", colour = member.colour, timestamp = datetime.utcnow())
                 embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
