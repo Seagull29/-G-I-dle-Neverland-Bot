@@ -152,13 +152,22 @@ class Paginas(ListPageSource):
             id = self.urls[menu.current_page][0]['id']
             content_source = self.urls[menu.current_page][0]['source']
 
+            if 'user' in self.urls[menu.current_page][0]:
+                name_author = self.urls[menu.current_page][0]['user']['display_name']
+                if  name_author in ['', ' ']:
+                    name_author = self.urls[menu.current_page][0]['user']['username']
+                    if name_author in ['', ' ']:
+                        name_author = 'Autor desconocido'
+            else:
+                name_author = 'Autor desconocido'
+
             #longitud_codigo = 31 + url[31:].find("/")
             print ("Flag " + url)
             embed = Embed(title = "Giphy!", 
                         description = f"**Resultados para:** *{self.busqueda}*", 
                         colour = self.ctx.author.colour, timestamp = datetime.utcnow())
 
-            embed.set_author(name = self.urls[menu.current_page][0]['user']['display_name'] if 'user' in self.urls[menu.current_page][0] else 'Autor desconocido', 
+            embed.set_author(name = name_author, 
                             icon_url = self.urls[menu.current_page][0]['user']['avatar_url'] if 'user' in self.urls[menu.current_page][0] else '')
 
             embed.set_thumbnail(url = "https://giphy.com/static/img/giphy_logo_square_social.png")

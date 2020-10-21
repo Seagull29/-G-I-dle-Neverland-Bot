@@ -111,7 +111,9 @@ class Bot(CBot):
 
     async def on_message(self, mensaje):
         if not mensaje.author.bot:
-
+            if mensaje.content.endswith(".jpg") or mensaje.content.endswith(".png"):
+                await mensaje.add_reaction("❤️")
+                await mensaje.add_reaction("🤩")
             await self.process_commands(mensaje)
 
     async def on_command_error(self, ctx, error):
