@@ -5,7 +5,7 @@ from typing import Optional
 from discord import Embed, Member
 from discord.ext.tasks import loop
 from itertools import cycle
-
+from discord import Spotify
 ESTADOS = cycle(["Pronto disponible", "En construccion", "ACM"])
 
 class Info(Cog):
@@ -85,7 +85,43 @@ class Info(Cog):
         await ctx.send(embed = embed)  
 
 
+    def only_members(self, member):
+        if not member.bot:
+            return member
 
+    @command(name = "spotify", aliases = ["spy"])
+    async def spotify_command(self, ctx, member : discord.Member = None):
+        if member is None:
+            tracks = []
+            for miembro in list(filter(self.only_members, ctx.guild.members)):
+                for actividad in miembro.activities:
+                    if isinstance(actividad, Spotify):
+                        tracks.append(("Usuario", f"*{miembro.display_name}*", True))
+                        tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
+                        tracks.append(("Cancion", f"*{actividad.title}*", True))
+                        tracks.append(("Album", f"*{actividad.album}*", False))
+            embed = Embed(title = "Escuchando Spotify", description = "Usuarios escuchando Spotify",
+                                      colour = ctx.author.colour, timestamp = datetime.utcnow())
+            embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
+            embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/438207041912176652/768338391619207199/spotify.png")
+            for name, value, inline in tracks:
+                embed.add_field(name = name, value = value, inline = inline)
+            await ctx.send(embed = embed)
+        elif not member.bot:
+            tracks = []
+            for actividad in member.activities:
+                logo = ""
+                if isinstance(actividad, Spotify):
+                    tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
+                    tracks.append(("Cancion", f"*{actividad.title}*", True))
+                    tracks.append(("Album", f"*{actividad.album}*", False))
+                    logo = actividad.album_cover_url
+                embed = Embed(title = f"Actividad en Spotify de {member.display_name}", colour = member.colour, timestamp = datetime.utcnow())
+                embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
+                embed.set_thumbnail(url = logo)
+                for name, value, inline in tracks:
+                    embed.add_field(name = name, value = value, inline = inline)
+                await ctx.send(embed = embed)
 
 def setup(client):
     client.add_cog(Info(client))
