@@ -5,7 +5,7 @@ from typing import Optional
 from discord import Embed, Member
 from discord.ext.tasks import loop
 from itertools import cycle
-from discord import Spotify
+from discord import Spotify, Forbidden
 ESTADOS = cycle(["Pronto disponible", "En construccion", "ACM"])
 
 class Info(Cog):
