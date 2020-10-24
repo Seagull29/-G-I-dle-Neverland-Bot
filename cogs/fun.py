@@ -47,8 +47,19 @@ class Fun(Cog):
         embed.add_field(name = "Enlace", value = f"*https://giphy.com/{'gifs' if not 'stickers' in search_type else 'stickers'}/{url[31 : longitud_codigo]}*", inline = True)
         embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
         embed.set_image(url= str(url))
+        Intermediario.set_url(embed)
         mensaje = await ctx.send(embed = embed)
         await mensaje.add_reaction("🤔")
+
+
+    async def send_gif(self, ctx):
+        def check(m):
+                return m.channel == ctx.channel and m.content == "s" and m.author == ctx.author 
+        mensaje = await self.bot.wait_for('message', check = check)
+        await ctx.channel.purge(limit = 1)
+        await ctx.author.send(content = f">>> **{ctx.author.display_name}, su gif:**", embed = Intermediario.url())
+
+
 
     @command(name = "yt", aliases = ["youtube"])
     async def youtube_search(self, ctx, *, video):
@@ -92,7 +103,8 @@ class Fun(Cog):
                 #    direcciones.append([url['images']['original']['url']]) # Filtra del archivo json todas las urls de la busqueda
                 
                 menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search, GIPHY), delete_message_after = False)
-                await menu.start(ctx)  
+                await menu.start(ctx)
+            await self.send_gif(ctx) 
 
         elif search_type in ["g", "gif"]:
 
@@ -119,6 +131,7 @@ class Fun(Cog):
                 
                 menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search, GIPHY), delete_message_after = False)
                 await menu.start(ctx)  
+            await self.send_gif(ctx)
         await session.close()
 
     @command(name = "tenor", pass_context = True)
@@ -130,7 +143,21 @@ class Fun(Cog):
             direcciones = [[gif_object] for gif_object in data['results']]
             menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), TRENDING_LABEL, TENOR), delete_message_after = False)
             await menu.start(ctx)
+            await self.send_gif(ctx)
         await session.close()
+
+class Intermediario():
+    
+    __url = ""
+
+    @classmethod
+    def set_url(cls, url):
+        Intermediario.__url = url 
+
+    @classmethod
+    def url(cls):
+        return Intermediario.__url
+    
 
 
 class Paginas(ListPageSource):
@@ -180,6 +207,7 @@ class Paginas(ListPageSource):
     
             embed.set_footer(text = f"Solicitado por {self.ctx.author.display_name}" + "\n" + f"{offset:,} de {len_data:,} gifs.", icon_url = self.ctx.author.avatar_url)
             embed.set_image(url= str(url))
+            Intermediario.set_url(embed)
             return embed
 
         elif self.source == TENOR:
@@ -195,6 +223,7 @@ class Paginas(ListPageSource):
             embed.add_field(name = "Enlace", value = f"*https://tenor.com/view/{id}*", inline = False)
             embed.set_footer(text = f"Solicitado por {self.ctx.author.display_name}" + "\n" + f"{offset:,} de {len_data:,} gifs.", icon_url = self.ctx.author.avatar_url) 
             embed.set_image(url = url)
+            Intermediario.set_url(embed)
             return embed
 
 class BusquedaYoutube(ListPageSource):

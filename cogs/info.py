@@ -123,5 +123,17 @@ class Info(Cog):
                     embed.add_field(name = name, value = value, inline = inline)
                 await ctx.send(embed = embed)
 
+    @command(name = "send", aliases = ["sendmessage"])
+    async def send_command(self, ctx, member : discord.Member = None, *, message):
+        if not member is None and not member.bot:
+            try:
+                await member.send(f">>> **{member.display_name}**, *{message}*")
+                await ctx.channel.purge(limit = 1)
+            except Forbidden:
+                pass
+        else:
+            await ctx.send(f"{member.mention}, no puedo enviar el mensaje.")
+            await ctx.channel.purge(limit = 1)
+
 def setup(client):
     client.add_cog(Info(client))
