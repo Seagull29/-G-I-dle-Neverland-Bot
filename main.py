@@ -128,7 +128,7 @@ class Bot(CBot):
         if not self.ready:
             self.guild = self.get_guild(764606089068281856)
             self.stdout = self.get_channel(764606089509208114)
-            self.scheduler.add_job(self.rules_reminder, CronTrigger(hour = '1, 17', minute = 0, second = 0))
+            self.scheduler.add_job(self.rules_reminder, CronTrigger(hour = 17, minute = 0, second = 0))
             self.scheduler.add_job(self.cambiar_estado, CronTrigger(minute = '0, 40', second = 0))
             self.scheduler.start()
             print("Bot listo")
