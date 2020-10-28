@@ -99,8 +99,9 @@ class Info(Cog):
                 for actividad in miembro.activities:
                     if isinstance(actividad, Spotify):
                         nro_miembro += 1
+                        artistas = ", ".join(actividad.artists)
                         tracks.append((f"{nro_miembro}. Usuario", f"*{miembro.display_name}*", True))
-                        tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
+                        tracks.append(("Artista(s)", f"*{artistas}*", True))
                         tracks.append(("Cancion", f"*{actividad.title}*", True))
                         tracks.append(("Album", f"*{actividad.album}*", False))
             embed = Embed(title = "Escuchando Spotify", description = "Usuarios escuchando Spotify",
