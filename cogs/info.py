@@ -94,10 +94,12 @@ class Info(Cog):
         if member is None:
             tracks = []
             miembros = list(filter(self.only_members, ctx.guild.members))
+            nro_miembro = 0
             for miembro in miembros:
                 for actividad in miembro.activities:
                     if isinstance(actividad, Spotify):
-                        tracks.append((f"{miembros.index(miembro) + 1}. Usuario", f"*{miembro.display_name}*", True))
+                        nro_miembro += 1
+                        tracks.append((f"{nro_miembro}. Usuario", f"*{miembro.display_name}*", True))
                         tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
                         tracks.append(("Cancion", f"*{actividad.title}*", True))
                         tracks.append(("Album", f"*{actividad.album}*", False))
