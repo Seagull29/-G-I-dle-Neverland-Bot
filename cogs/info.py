@@ -93,17 +93,18 @@ class Info(Cog):
     async def spotify_command(self, ctx, member : discord.Member = None):
         if member is None:
             tracks = []
-            for miembro in list(filter(self.only_members, ctx.guild.members)):
+            miembros = list(filter(self.only_members, ctx.guild.members))
+            for miembro in miembros:
                 for actividad in miembro.activities:
                     if isinstance(actividad, Spotify):
-                        tracks.append(("Usuario", f"*{miembro.display_name}*", True))
+                        tracks.append((f"{miembros.index(miembro) + 1}. Usuario", f"*{miembro.display_name}*", True))
                         tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
                         tracks.append(("Cancion", f"*{actividad.title}*", True))
                         tracks.append(("Album", f"*{actividad.album}*", False))
             embed = Embed(title = "Escuchando Spotify", description = "Usuarios escuchando Spotify",
                                       colour = ctx.author.colour, timestamp = datetime.utcnow())
             embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
-            embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/438207041912176652/768338391619207199/spotify.png")
+            embed.set_thumbnail(url = "https://developer.spotify.com/assets/branding-guidelines/icon4@2x.png")
             for name, value, inline in tracks:
                 embed.add_field(name = name, value = value, inline = inline)
             await ctx.send(embed = embed)
