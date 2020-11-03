@@ -1,5 +1,5 @@
 from discord.ext.commands import Cog
-from discord.ext.commands import command
+from discord.ext.commands import command, group
 from discord.ext import menus
 import requests
 from discord import Embed
@@ -74,7 +74,80 @@ class Fun(Cog):
             await menu.start(ctx)
             #await ctx.send("https://www.youtube.com/watch?v=" + video_ids[0])
 
-   
+    """
+    @group(name = "giphy", aliases = ["gy"], invoke_without_command = True)
+    async def giphy_group(self, ctx):
+        pass
+
+    @group(name = "tenor", aliases = ["ten"], invoke_without_command = True)
+    async def tenor_group(self, ctx):
+        pass
+
+    @giphy_group.group(name = "gif", aliases = ["gf", "g"], invoke_without_command = True)
+    async def giphy_search_gif_subgroup(self, ctx, *, search):
+        session = aiohttp.ClientSession()
+        if search is not None:
+            search.replace(' ', '+')
+            response = await session.get('http://api.giphy.com/v1/gifs/search?q=' + search + '&api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG&limit=30')
+            data = json.loads(await response.text())
+            direcciones = [[gif_object] for gif_object in data['data']]
+            #for url in data['data']:
+             #    direcciones.append([url['images']['original']['url']]) # Filtra del archivo json todas las urls de la busqueda 
+            menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search, GIPHY), delete_message_after = False)
+            await menu.start(ctx)
+        else:
+            response = await session.get('https://api.giphy.com/v1/gifs/random?api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG')
+            data = json.loads(await response.text())
+            #url = data['data']['images']['original']['url']
+            await self.giphy_random(ctx, data)
+        await self.send_gif(ctx)
+        await session.close()
+
+    @giphy_search_gif_subgroup.command(name = "trend", aliases = ["trending", "tt"])
+    async def giphy_trending_gif_subcommand(self, ctx):
+        session = aiohttp.ClientSession()
+        response = await session.get('https://api.giphy.com/v1/gifs/trending?api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG&limit=30')
+        data = json.loads(await response.text())
+        direcciones = [[gif_object] for gif_object in data['data']]
+        menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), TRENDING_LABEL, GIPHY), delete_message_after = False)
+        await menu.start(ctx)
+        await self.send_gif(ctx) 
+        await session.close()
+
+
+    @giphy_group.group(name = "sticker", aliases = ["stick", "stk"], invoke_without_command = True)
+    async def giphy_search_sticker_subgroup(self, ctx, *, search):
+        session = aiohttp.ClientSession()
+        if search is not None:
+            search.replace(' ', '+')
+            response = await session.get('http://api.giphy.com/v1/stickers/search?q=' + search + '&api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG&limit=30')
+            data = json.loads(await response.text())
+            direcciones = [[gif_object] for gif_object in data['data']]
+            #for url in data['data']:
+            #    direcciones.append([url['images']['original']['url']]) # Filtra del archivo json todas las urls de la busqueda
+            menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), search, GIPHY), delete_message_after = False)
+            await menu.start(ctx)
+        else:
+            response = await session.get('https://api.giphy.com/v1/stickers/random?api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG')
+            data = json.loads(await response.text())
+            #url = data['data']['images']['original']['url']
+            await self.giphy_random(ctx, data)
+        await self.send_gif(ctx)
+        await session.close()
+            
+    @giphy_search_sticker_subgroup.command(name = "trend", aliases = ["trending", "tt"])
+    async def giphy_trending_sticker_subcommand(self, ctx):
+        session = aiohttp.ClientSession()
+        response = await session.get('https://api.giphy.com/v1/stickers/trending?api_key=NMGKDkhX4308QRqQBCQW0n4V22o7XdUG&limit=30')
+        data = json.loads(await response.text())
+        direcciones = [[gif_object] for gif_object in data['data']]
+        menu = MenuPages(source = Paginas(ctx, sample(direcciones, len(direcciones)), TRENDING_LABEL, GIPHY), delete_message_after = False)
+        await menu.start(ctx)
+        await self.send_gif(ctx)
+        await session.close()
+
+    """
+
     @command(name = "giphy", aliases = ["gy"], pass_context = True)
     async def giphy_command(self, ctx, search_type : str, *, search = None):
         session = aiohttp.ClientSession()
