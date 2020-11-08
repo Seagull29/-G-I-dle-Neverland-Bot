@@ -90,7 +90,7 @@ class Info(Cog):
             return member
 
     @group(name = "spotify", aliases = ["spy"], invoke_without_command = True)
-    async def spotify_command(self, ctx, search : str):
+    async def spotify_command(self, ctx, search : str = None):
         games = {"lol" : "League of Legends", "fn" : "Fornite", "rl" : "Rocket League", 
                  "dbd" : "Dead by Daylight", "l4d" : "Left 4 Dead 2"}
         if search is None:
