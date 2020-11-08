@@ -7,7 +7,8 @@ from discord.ext.tasks import loop
 from itertools import cycle
 from discord import Spotify, Forbidden
 ESTADOS = cycle(["Pronto disponible", "En construccion", "ACM"])
-
+games = {"lol" : "League of Legends", "fn" : "Fornite", "rl" : "Rocket League", 
+                 "dbd" : "Dead by Daylight", "l4d2" : "Left 4 Dead 2"}
 class Info(Cog):
 
     def __init__(self, client):
@@ -91,53 +92,58 @@ class Info(Cog):
 
     @group(name = "spotify", aliases = ["spy"], invoke_without_command = True)
     async def spotify_command(self, ctx, search : str = None):
-        games = {"lol" : "League of Legends", "fn" : "Fornite", "rl" : "Rocket League", 
-                 "dbd" : "Dead by Daylight", "l4d" : "Left 4 Dead 2"}
         if search is None:
-            tracks = []
             miembros = list(filter(self.only_members, ctx.guild.members))
-            nro_miembro = 0
             for miembro in miembros:
                 for actividad in miembro.activities:
-                    print (actividad)
-                    print (type(actividad))
-                    print("---------------------")
                     if isinstance(actividad, Spotify):
-                        nro_miembro += 1
                         artistas = ", ".join(actividad.artists)
-                        tracks.append((f"{nro_miembro}. Usuario", f"*{miembro.display_name}*", True))
-                        tracks.append(("Artista(s)", f"*{artistas}*", True))
-                        tracks.append(("Cancion", f"*{actividad.title}*", True))
-                        tracks.append(("Album", f"*{actividad.album}*", False))
-            embed = Embed(title = "Escuchando Spotify", description = "Usuarios escuchando Spotify",
-                                      colour = ctx.author.colour, timestamp = datetime.utcnow())
-            embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
-            embed.set_thumbnail(url = "https://developer.spotify.com/assets/branding-guidelines/icon4@2x.png")
-            for name, value, inline in tracks:
-                embed.add_field(name = name, value = value, inline = inline)
-            await ctx.send(embed = embed)
+                        track = []
+                        timedelta = str(actividad.duration).split(".")[0]
+                        start = actividad.start.strftime("%H:%M:%S")
+                        end = actividad.end.strftime("%H:%M:%S")
+                        created = actividad.created_at.strftime("%H:%M:%S")
+                        track.append(("Artista(s)", f"*{artistas}*", True))
+                        track.append(("Cancion", f"*{actividad.title}*", True))
+                        track.append(("Album", f"*{actividad.album}*", True))
+                        track.append(("Duracion", f"*{timedelta}*", True))
+                        track.append(("Hora Inicio(UTC)", f"*{start}*", True))
+                        track.append(("Finalizacion(UTC)", f"*{end}*", True))
+                        embed = Embed(colour = actividad.colour, timestamp = datetime.utcnow())
+                        embed.set_author(name = miembro.display_name, icon_url = miembro.avatar_url)
+                        embed.set_footer(text = f"Hora Reanudacion(UTC): {created}", icon_url = "https://developer.spotify.com/assets/branding-guidelines/icon4@2x.png")
+                        embed.set_thumbnail(url = actividad.album_cover_url)
+                        for name, value, inline in track:
+                            embed.add_field(name = name, value = value, inline = inline)
+                        await ctx.send(embed = embed)
+
+
+    @spotify_command.command(name = "lol") 
+    async def lol_subcommand(self, ctx):
+        miembros = list(filter(self.only_members, ctx.guild.members))
+        for miembro in miembros:
+            for actividad in miembro.activities:
+                if isinstance(actividad, discord.activity.Activity) and actividad.name == games['lol']:
+                    player = [("Juego", f"*{games['lol']}*", True),
+                              ("Estado", f"*{actividad.state}*", True), 
+                              ("Detalles", f"*{actividad.details}*", True)]
+                    embed = Embed(colour = miembro.colour, timestamp = datetime.utcnow())
+                    embed.set_thumbnail(url = actividad.large_image_url)
+                    embed.set_author(name = miembro.display_name, icon_url = miembro.avatar_url)
+                    for name, value, inline in player:
+                        embed.add_field(name = name, value = value, inline = inline)
+                    await ctx.send(embed = embed)
+        
+        
+        """
         elif search in games:
-            players = []
-            miembros = list(filter(self.only_members, ctx.guild.members))
-            nro_miembro = 0
-            for miembro in miembros:
-                for actividad in miembro.activities:
-                    
-                    if isinstance(actividad, discord.activity.Activity) and actividad.name == games[search]:
-                        nro_miembro += 1
-                        player = [("Juego", f"*{games[search]}*", True),
-                                  ("Estado", f"*{actividad.state}*", True), ("Detalles", f"*{actividad.details}*", False)]
+            
                         #players.append((f"{nro_miembro}. Usuario", f"*{miembro.display_name}*", True))
                         #players.append(("Juego", f"*{games[search]}*", True))
                         #players.append(("Estado", f"*{actividad.state}*", True))
                         #players.append(("Detalles", f"*{actividad.details}*", False))
 
-                        embed = Embed(colour = miembro.colour, timestamp = datetime.utcnow())
-                        embed.set_thumbnail(url = actividad.large_image_url)
-                        embed.set_author(name = miembro.display_name, icon_url = miembro.avatar_url)
-                        for name, value, inline in player:
-                            embed.add_field(name = name, value = value, inline = inline)
-                        await ctx.send(embed = embed)
+                        
 
             #embed = Embed(title = f"**{games[search]}**", colour = ctx.author.colour, timestamp = datetime.utcnow())
             #embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
@@ -159,7 +165,7 @@ class Info(Cog):
                 embed.add_field(name = name, value = value, inline = inline)
             
             await ctx.send(embed = embed)
-
+        """
 
 
 
