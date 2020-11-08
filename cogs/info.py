@@ -1,5 +1,5 @@
 import discord
-from discord.ext.commands import command, Cog
+from discord.ext.commands import command, Cog, group
 from datetime import datetime
 from typing import Optional
 from discord import Embed, Member
@@ -89,14 +89,19 @@ class Info(Cog):
         if not member.bot:
             return member
 
-    @command(name = "spotify", aliases = ["spy"])
-    async def spotify_command(self, ctx, member : discord.Member = None):
-        if member is None:
+    @group(name = "spotify", aliases = ["spy"], invoke_without_command = True)
+    async def spotify_command(self, ctx, search : str):
+        games = {"lol" : "League of Legends", "fn" : "Fornite", "rl" : "Rocket League", 
+                 "dbd" : "Dead by Daylight", "l4d" : "Left 4 Dead 2"}
+        if search is None:
             tracks = []
             miembros = list(filter(self.only_members, ctx.guild.members))
             nro_miembro = 0
             for miembro in miembros:
                 for actividad in miembro.activities:
+                    print (actividad)
+                    print (type(actividad))
+                    print("---------------------")
                     if isinstance(actividad, Spotify):
                         nro_miembro += 1
                         artistas = ", ".join(actividad.artists)
@@ -111,21 +116,52 @@ class Info(Cog):
             for name, value, inline in tracks:
                 embed.add_field(name = name, value = value, inline = inline)
             await ctx.send(embed = embed)
-        elif not member.bot:
-            tracks = []
-            for actividad in member.activities:
-                logo = ""
-                if isinstance(actividad, Spotify):
-                    tracks.append(("Artista(s)", f"*{actividad.artists}*", True))
-                    tracks.append(("Cancion", f"*{actividad.title}*", True))
-                    tracks.append(("Album", f"*{actividad.album}*", True))
-                    logo = actividad.album_cover_url
-                embed = Embed(title = f"Actividad en Spotify de {member.display_name}", colour = member.colour, timestamp = datetime.utcnow())
-                embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
-                embed.set_thumbnail(url = logo)
-                for name, value, inline in tracks:
-                    embed.add_field(name = name, value = value, inline = inline)
-                await ctx.send(embed = embed)
+        elif search in games:
+            players = []
+            miembros = list(filter(self.only_members, ctx.guild.members))
+            nro_miembro = 0
+            for miembro in miembros:
+                for actividad in miembro.activities:
+                    
+                    if isinstance(actividad, discord.activity.Activity) and actividad.name == games[search]:
+                        nro_miembro += 1
+                        player = [("Juego", f"*{games[search]}*", True),
+                                  ("Estado", f"*{actividad.state}*", True), ("Detalles", f"*{actividad.details}*", False)]
+                        #players.append((f"{nro_miembro}. Usuario", f"*{miembro.display_name}*", True))
+                        #players.append(("Juego", f"*{games[search]}*", True))
+                        #players.append(("Estado", f"*{actividad.state}*", True))
+                        #players.append(("Detalles", f"*{actividad.details}*", False))
+
+                        embed = Embed(colour = miembro.colour, timestamp = datetime.utcnow())
+                        embed.set_thumbnail(url = actividad.large_image_url)
+                        embed.set_author(name = miembro.display_name, icon_url = miembro.avatar_url)
+                        for name, value, inline in player:
+                            embed.add_field(name = name, value = value, inline = inline)
+                        await ctx.send(embed = embed)
+
+            #embed = Embed(title = f"**{games[search]}**", colour = ctx.author.colour, timestamp = datetime.utcnow())
+            #embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
+            #embed.set_thumbnail(url = "https://developer.spotify.com/assets/branding-guidelines/icon4@2x.png")
+            #for name, value, inline in players:
+                #embed.add_field(name = name, value = value, inline = inline)
+            #await ctx.send(embed = embed)
+        else:
+            embed = Embed(title = "**Abreviacion de juegos**", colour = ctx.author.colour, timestamp = datetime.utcnow())
+            embed.set_footer(text = f"Solicitado por {ctx.author.display_name}", icon_url = ctx.author.avatar_url)
+            data = []
+            nro = 0
+            for key, value in games.items():
+                nro += 1
+                data.append(("N°", f"**{nro}**", True))
+                data.append(("Abreviacion", f"***{key}***", True))
+                data.append(("Juego", f"*{value}*", True))
+            for name, value, inline in data:
+                embed.add_field(name = name, value = value, inline = inline)
+            
+            await ctx.send(embed = embed)
+
+
+
 
     @command(name = "send", aliases = ["sendmessage"])
     async def send_command(self, ctx, member : discord.Member = None, *, message):

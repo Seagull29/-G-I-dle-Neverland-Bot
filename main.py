@@ -96,7 +96,7 @@ class Bot(CBot):
 
     async def rules_reminder(self):
         #recordatorio = await self.stdout.send(f">>> Recuerden mantener activo el server ❤️😓." + "\n" + f"Pasen por {self.get_channel(764918831516090368).mention} para obtener el rol de sus bias.")
-        recordatorio = await self.stdout.send(f">>> Se les recuerda participar en la encuesta para mejorar el servidor." + "\n" + f"Pueden encontrar la propuesta en {self.get_channel(770785716426637342).mention}." + "\n" + f"<{self.main_role.mention}>")
+        recordatorio = await self.stdout.send(f">>> **Nuevos roles agregados**" + "\n" + f"Pasen por {self.get_channel(764918831516090368).mention}, para que agreguen su reaccion y de esa forma tener acceso a los canales de dichos juegos." + "\n" + f"<{self.main_role.mention}>")
         await recordatorio.add_reaction("🎼")
 
 
@@ -130,7 +130,7 @@ class Bot(CBot):
             self.guild = self.get_guild(764606089068281856)
             self.stdout = self.get_channel(764606089509208114)
             self.main_role = self.guild.get_role(764949862567116811)
-            self.scheduler.add_job(self.rules_reminder, CronTrigger(hour = '18, 2', minute = 0, second = 0))
+            self.scheduler.add_job(self.rules_reminder, CronTrigger(hour = '18, 2', minute = 30, second = 0))
             self.scheduler.add_job(self.cambiar_estado, CronTrigger(minute = '0, 40', second = 0))
             self.scheduler.start()
             print("Bot listo")
