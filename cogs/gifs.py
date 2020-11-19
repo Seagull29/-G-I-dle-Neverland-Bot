@@ -4,7 +4,7 @@ import json, aiohttp
 from random import sample
 from discord import Embed
 from discord.ext.menus import MenuPages, ListPageSource
-from gifsapi.gifsapi import GiphyAPI, TenorAPI, Giphy, Tenor, GiphyType
+from apis.gifsapi import GiphyAPI, TenorAPI, Giphy, Tenor, GiphyType
 
 TRENDING_LABEL = "**Trendings**"
 RANDOM_SEARCH = "Aleatorios de "
