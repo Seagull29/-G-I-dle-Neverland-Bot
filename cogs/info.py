@@ -1,4 +1,4 @@
-import discord
+import discord, aiohttp, json
 from discord.ext.commands import command, Cog, group
 from datetime import datetime
 from typing import Optional
@@ -167,7 +167,44 @@ class Info(Cog):
             await ctx.send(embed = embed)
         """
 
+    @command(name = "vlive")
+    async def vlide(self, ctx, limit : int):
+        session = aiohttp.ClientSession()
+        BASE_URL = 'http://api.vfan.vlive.tv/vproxy/channelplus'
+        payload = {
+            'app_id': "8c6cc7b45d2568fb668be6e05b6e5a3b",
+            'channelSeq': "785",
+            'maxNumOfRows': 10,
+            'pageNo': 1,
+        }
+        response = await session.get(f"{BASE_URL}/getChannelVideoList", params = payload)
+        data = json.loads(await response.text())
+        await session.close()
+        url_home = "https://channels.vlive.tv/CE2621/home"
+        for i in range(limit):
+            video = data['result']['videoList'][i]
 
+            embed = Embed(
+                title = video['title'],
+                description = f"{video['representChannelName']} : vlive!",
+                url = f"https://www.vlive.tv/video/{video['videoSeq']}",
+                timestamp = datetime.now()
+            )
+
+            embed.set_author(
+                name = video['representChannelName'],
+                url = f"{url_home}",
+                icon_url = data['result']['channelInfo']['channelProfileImage']
+            )
+
+            embed.set_image(url = f"{video['thumbnail']}?type=f886_499")
+
+            embed.set_footer(
+                text = "Test",
+                icon_url = "https://i.imgur.com/gHo7BTO.png"
+            )
+
+            await ctx.send(embed = embed)
 
     @command(name = "send", aliases = ["sendmessage"])
     async def send_command(self, ctx, member : discord.Member = None, *, message):
